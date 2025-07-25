@@ -3,6 +3,9 @@ Tools for visualizing neural nets
 
 ## setup (on mac/linux)
 ```
+git clone git@github.com:phillipi/plot-net.git
+cd plot-net
+
 python3 -m venv venv
 source venv/bin/activate
 pip install torch matplotlib numpy
