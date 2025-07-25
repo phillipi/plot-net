@@ -3,9 +3,10 @@ import torch.nn.functional as F
 import numpy as np
 
 class Net(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, d=2):
         super(Net, self).__init__()
         self.criterion = None
+        self.d = d
 
     @property
     def layer_names(self):
@@ -55,14 +56,14 @@ class Net(torch.nn.Module):
             loss = criterion(output[-1], Y)
         return loss
 
-# Example simple network: an MLP with width 2
+# Example simple network: an MLP with width d
 class MySimpleNet(Net):
-    def __init__(self):
-        super(MySimpleNet, self).__init__()
+    def __init__(self, d=2):
+        super(MySimpleNet, self).__init__(d)
 
-        Nx = 2 # data dimensionality
-        Nz = 2 # width
-        Ny = 2 # output dimensionality
+        Nx = d # data dimensionality
+        Nz = d # width
+        Ny = d # output dimensionality
 
         self.l1 = torch.nn.Linear(Nx, Nz)
         self.relu1 = torch.nn.ReLU()
@@ -82,22 +83,41 @@ class MySimpleNet(Net):
                 torch.nn.init.zeros_(m.bias)
 
 class LinearLayer(Net):
-    def __init__(self):
-        super(LinearLayer, self).__init__()
+    def __init__(self, d=2):
+        super(LinearLayer, self).__init__(d)
 
-        Nx = 2 # data dimensionality
-        Nz = 2 # width
+        Nx = d # data dimensionality
+        Nz = d # width
 
         self.linear = torch.nn.Linear(Nx, Nz)
 
         self.apply(self.weights_init)
     
     def weights_init(self, m):
-        # init to a nice simple rotation + translation, for visualization
-        if isinstance(m, torch.nn.Linear):
-            angle = np.pi/5
-            m.weight.data = torch.FloatTensor([[np.cos(angle),-np.sin(angle)],[np.sin(angle),np.cos(angle)]])
-            m.bias.data = torch.FloatTensor([-0.5,0.5])
+        if self.d == 2:
+            # for 2D case, init to a nice simple rotation + translation, for visualization
+            if isinstance(m, torch.nn.Linear):
+                angle = np.pi/5
+                m.weight.data = torch.FloatTensor([[np.cos(angle),-np.sin(angle)],[np.sin(angle),np.cos(angle)]])
+                m.bias.data = torch.FloatTensor([-0.5,0.5])
+        elif self.d == 3:
+            # for 3D case, init to a small rotation around z and a translation
+            if isinstance(m, torch.nn.Linear):
+                angle = np.pi/10
+                rot = torch.FloatTensor([
+                    [np.cos(angle), -np.sin(angle), 0],
+                    [np.sin(angle),  np.cos(angle), 0],
+                    [0,              0,             1]
+                ])
+                m.weight.data = rot
+                m.bias.data = torch.FloatTensor([-0.25, 0.5, 0.5])
+        else:
+            # init to identity for clearer visualization
+            if isinstance(m, torch.nn.Linear):
+                m.reset_parameters()
+                torch.nn.init.eye_(m.weight.data)
+                if m.bias is not None:
+                    torch.nn.init.zeros_(m.bias)
 
 class Norm(torch.nn.Module):
     def __init__(self,p):
@@ -108,33 +128,33 @@ class Norm(torch.nn.Module):
         return F.normalize(x, self.p, dim=1)
 
 class L2NormLayer(Net):
-    def __init__(self):
-        super(L2NormLayer, self).__init__()
+    def __init__(self, d=2):
+        super(L2NormLayer, self).__init__(d)
 
         self.l2_norm = Norm(2)
 
 class ReLULayer(Net):
-    def __init__(self):
-        super(ReLULayer, self).__init__()
+    def __init__(self, d=2):
+        super(ReLULayer, self).__init__(d)
 
         self.relu = torch.nn.ReLU()
 
 class SoftmaxLayer(Net):
-    def __init__(self):
-        super(SoftmaxLayer, self).__init__()
+    def __init__(self, d=2):
+        super(SoftmaxLayer, self).__init__(d)
 
         self.softmax = torch.nn.Softmax(dim=1)
 
-def mk_model(which_model):
+def mk_model(which_model, d=2):
     if which_model == 'MySimpleNet':
-        return MySimpleNet()
+        return MySimpleNet(d)
     elif which_model == 'linear':
-        return LinearLayer()
+        return LinearLayer(d)
     elif which_model == 'relu':
-        return ReLULayer()
+        return ReLULayer(d)
     elif which_model == 'l2_norm':
-        return L2NormLayer()
+        return L2NormLayer(d)
     elif which_model == 'softmax':
-        return SoftmaxLayer()
+        return SoftmaxLayer(d)
     else:
         raise ValueError(f"Model {which_model} not found")
