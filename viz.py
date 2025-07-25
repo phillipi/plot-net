@@ -127,7 +127,7 @@ def vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs,
 
         # Plot each edge
         for i, j in edges:
-            ax.plot([x[i], x[j]], [y[i], y[j]], [z[i], z[j]], color = [0.7,0.7,0.7], linewidth=3.0, linestyle='--', zorder=2*l+.0001)
+            ax.plot([x[i], x[j]], [y[i], y[j]], [z[i], z[j]], color = [0.2,0.2,0.2], linewidth=3.0, linestyle='--', zorder=2*l+.0001)
         
         # plot axes box
         x = grid_flat[:,0]
@@ -150,7 +150,7 @@ def vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs,
         # Create a 3D polygon collection
         poly3d = [[verts[i] for i in face] for face in faces]
         from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-        ax.add_collection3d(Poly3DCollection(poly3d, edgecolor = [0,0,0, 1], facecolor = [1,1,1, 0.2], linewidth=3.0, linestyle='-', zorder=2*l+.0001))
+        ax.add_collection3d(Poly3DCollection(poly3d, edgecolor = [0.7,0.7,0.7, 1], facecolor = [1,1,1, 0.2], linewidth=3.0, linestyle='-', zorder=2*l+.0001))
 
         '''
         ax.plot_surface(grid_us[:,:,0], grid_vs[:,:,0], (l*z_step)*np.ones_like(grid_us[:,:,0]), rcount=1, ccount=1, color = [1.0,1.0,1.0], shade=False, linewidth=0, zorder=2*l+0.001,alpha=0.75)
@@ -166,8 +166,8 @@ def vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs,
         # plot grid mapping
         if l<n_layers:
             for i in range(0,grid_flat.shape[0]):
-                ax.plot([grid_flat[i,0], embeddings_nonsequential[l+1,i,0]], [-grid_flat[i,1], -embeddings_nonsequential[l+1,i,1]], [grid_flat[i,2]+l*z_step, embeddings_nonsequential[l+1,i,2]+(l+1)*z_step], '--', marker = 'o', color = [0.7, 0.7, 0.7], linewidth=3, markersize=10, zorder=2*l+1)#, alpha=.1)
-                ax.scatter(embeddings_nonsequential[l+1,i,0], -embeddings_nonsequential[l+1,i,1], embeddings_nonsequential[l+1,i,2]+(l+1)*z_step, marker = '>', color = [0.1, 0.1, 0.1], s=80, zorder=2*l+1.01)
+                ax.plot([grid_flat[i,0], embeddings_nonsequential[l+1,i,0]], [-grid_flat[i,1], -embeddings_nonsequential[l+1,i,1]], [grid_flat[i,2]+l*z_step, embeddings_nonsequential[l+1,i,2]+(l+1)*z_step], '--', marker = 'o', color = [0.2, 0.2, 0.2], linewidth=3, markersize=10, zorder=2*l+1)#, alpha=.1)
+                ax.scatter(embeddings_nonsequential[l+1,i,0], -embeddings_nonsequential[l+1,i,1], embeddings_nonsequential[l+1,i,2]+(l+1)*z_step, marker = '>', color = [0.2, 0.2, 0.2], s=80, zorder=2*l+1.01)
             
             # display layer name
             font_prop = font_manager.FontProperties(size=42)
@@ -214,7 +214,8 @@ def viz_movie_update(frame, net, embeddings, embeddings_nonsequential, Y, grid_u
     print('rendering frame {} of {}'.format(frame, embeddings.shape[0]))
 
     ax.cla()  # clear current frame
-    
+    ax.view_init(elev=35, azim=135+180+frame*2)
+
     if net.d == 2:
         vizMapping2D(net, embeddings[frame], embeddings_nonsequential[frame], Y, grid_us, grid_vs, grid_flat, losses[frame], z_step, ax)
     elif net.d == 3:

@@ -39,7 +39,7 @@ if __name__ == "__main__":
         criterion = torch.nn.NLLLoss()
 
         # setup viz params
-        N_viz_iter = 30 # number of frames in the video
+        N_viz_iter = 180 # number of frames in the video
         N_train_iter_per_viz = 250 # number of training steps per frame
 
         # train the net, storing the embeddings on all layers at each step of optimization
