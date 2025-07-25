@@ -1,69 +1,140 @@
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
+import numpy as np
 
-class Net(nn.Module):
-
+class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
+        self.criterion = None
 
-        self.l1 = torch.nn.Linear(3,2,bias=False)
-        self.relu1 = nn.ReLU()
-        self.l2 = torch.nn.Linear(3,2,bias=False)
-        self.relu2 = nn.ReLU()
-        self.l3 = torch.nn.Linear(3,2,bias=False)
-        self.softmax = nn.Softmax(dim=1)
-        self.layer_names = ['linear', 'relu', 'linear', 'relu', 'linear', 'softmax']
+    @property
+    def layer_names(self):
+        return [layer.__class__.__name__.lower() for layer in self.children()]
 
-        self.s = torch.tensor([1.0],requires_grad=True)
+    @property
+    def get_n_layers(self):
+        return len(self.layer_names)
+    
+    def get_layer_name(self, layer_idx):
+        return self.layer_names[layer_idx]
 
     def forward(self, x):
-
-        output = x.view(1, x.size(0), x.size(1))
-        for layer in net.children():
-            if isinstance(layer, nn.Linear):
-                input = torch.cat([output[-1],torch.ones([x.size(0),1])],dim=1) # cat for bias
-            else:
-                input = output[-1]
+        """
+        Apply each layer of the network in sequence
+        Returns: [x, f1(x), f2(f1(x)), ...], where fi is layer i
+        """
+        output = x.view(1, x.size(0), x.size(1)) # list of embeddings per layer; first one is just the input data
+        for layer in self.children():
+            input = output[-1]
             new_output = layer(input).view(1, input.size(0), x.size(1))
             output = torch.cat((output,new_output), axis=0)
 
         return output
 
-    def forward_grid(self, x):
-        # applies each layer separately to the input x, rather than in sequence
-
-        output = x.view(1, x.size(0), x.size(1))
-        for layer in net.children():
-            if isinstance(layer, nn.Linear):
-                input = torch.cat([x,torch.ones([x.size(0),1])],dim=1) # cat for bias
-            else:
-                input = x
+    def forward_nonsequential(self, x):
+        """
+        Apply each layer of the network separately to the same grid of input points
+        Returns: [x, f1(x), f2(x), ...], where fi is layer i
+        """
+        output = x.view(1, x.size(0), x.size(1)) # list of embeddings per layer; first one is just the input data
+        input = x
+        for layer in self.children():
             new_output = layer(input).view(1, input.size(0), x.size(1))
             output = torch.cat((output,new_output), axis=0)
 
         return output
 
-    def get_layer_name(self, l):
-        return self.layer_names[l]
+    def weights_init(self, m):
+        pass
 
-def weights_init(m):
-    if isinstance(m, nn.Linear):
-        m.reset_parameters()
-        torch.nn.init.eye_(m.weight.data)
-        if m.bias is not None:
-          torch.nn.init.zeros_(m.bias)
+    def loss(self, X, Y, criterion):
+        output = self.forward(X)
+        if isinstance(criterion, torch.nn.NLLLoss):
+            loss = criterion(torch.log(output[-1]), Y)
+        else:
+            loss = criterion(output[-1], Y)
+        return loss
 
-def computeLoss(net, criterion, X, Y):
-  output = net(X)
-  loss = criterion(torch.log(output[-1]), Y)
-  return loss
+# Example simple network: an MLP with width 2
+class MySimpleNet(Net):
+    def __init__(self):
+        super(MySimpleNet, self).__init__()
 
-def trainForABit(net, criterion, optimizer, X, Y, N_train_iter_per_viz):
-  for jj in range(N_train_iter_per_viz):
-      optimizer.zero_grad()
-      loss = computeLoss(net,criterion,X,Y)
-      loss.backward()
-      optimizer.step()
-  return loss
+        Nx = 2 # data dimensionality
+        Nz = 2 # width
+        Ny = 2 # output dimensionality
+
+        self.l1 = torch.nn.Linear(Nx, Nz)
+        self.relu1 = torch.nn.ReLU()
+        self.l2 = torch.nn.Linear(Nz, Nz)
+        self.relu2 = torch.nn.ReLU()
+        self.l3 = torch.nn.Linear(Nz, Ny)
+        self.softmax = torch.nn.Softmax(dim=1)
+
+        self.apply(self.weights_init)
+
+    def weights_init(self, m):
+        # init to identity for clearer visualization
+        if isinstance(m, torch.nn.Linear):
+            m.reset_parameters()
+            torch.nn.init.eye_(m.weight.data)
+            if m.bias is not None:
+                torch.nn.init.zeros_(m.bias)
+
+class LinearLayer(Net):
+    def __init__(self):
+        super(LinearLayer, self).__init__()
+
+        Nx = 2 # data dimensionality
+        Nz = 2 # width
+
+        self.linear = torch.nn.Linear(Nx, Nz)
+
+        self.apply(self.weights_init)
+    
+    def weights_init(self, m):
+        # init to a nice simple rotation + translation, for visualization
+        if isinstance(m, torch.nn.Linear):
+            angle = np.pi/5
+            m.weight.data = torch.FloatTensor([[np.cos(angle),-np.sin(angle)],[np.sin(angle),np.cos(angle)]])
+            m.bias.data = torch.FloatTensor([-0.5,0.5])
+
+class Norm(torch.nn.Module):
+    def __init__(self,p):
+        super(Norm, self).__init__()
+        self.p = p
+
+    def forward(self, x):
+        return F.normalize(x, self.p, dim=1)
+
+class L2NormLayer(Net):
+    def __init__(self):
+        super(L2NormLayer, self).__init__()
+
+        self.l2_norm = Norm(2)
+
+class ReLULayer(Net):
+    def __init__(self):
+        super(ReLULayer, self).__init__()
+
+        self.relu = torch.nn.ReLU()
+
+class SoftmaxLayer(Net):
+    def __init__(self):
+        super(SoftmaxLayer, self).__init__()
+
+        self.softmax = torch.nn.Softmax(dim=1)
+
+def mk_model(which_model):
+    if which_model == 'MySimpleNet':
+        return MySimpleNet()
+    elif which_model == 'linear':
+        return LinearLayer()
+    elif which_model == 'relu':
+        return ReLULayer()
+    elif which_model == 'l2_norm':
+        return L2NormLayer()
+    elif which_model == 'softmax':
+        return SoftmaxLayer()
+    else:
+        raise ValueError(f"Model {which_model} not found")

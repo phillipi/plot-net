@@ -1,86 +1,52 @@
 # imports
 import numpy as np
-
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import matplotlib.font_manager as font_manager
-from matplotlib.animation import FuncAnimation
-
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
+import models, train, viz, datasets
+import argparse
 
-import time
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Plot-Net Visualization")
+    parser.add_argument('--which_dataset', type=str, default='gaussian_data', help='Dataset function to use from datasets module')
+    parser.add_argument('--which_model', type=str, default='linear', help='Model class to use from models module')
+    parser.add_argument('--viz_type', type=str, default='static', help='Type of visualization to use')
+    args = parser.parse_args()
 
-import utils, models, viz, datasets
+    # seed (for replicability)
+    seed = 0
+    np.random.seed(seed)
+    torch.manual_seed(seed)
 
-# setup directories
-layer_embeddings_viz_dir = './'
-vid_dir = './'
+    # make dataset
+    X, Y = datasets.mk_dataset(args.which_dataset)
+    grid_us, grid_vs, grid_flat = datasets.mk_grid_data()
 
-# seed (for replicability)
-seed = 0
-np.random.seed(seed)
-torch.manual_seed(seed)
+    # setup net
+    net = models.mk_model(args.which_model)
 
-# plotting parameters
-max_u, max_v = 1, 1
-min_u, min_v = -1, -1
-z_step = 3.2
+    if args.viz_type == 'training_movie':
 
-# make dataset
-X, Y = mk_dataset()
+        # setup optimizer
+        lr = 0.002
+        optimizer = torch.optim.SGD(net.parameters(), lr=lr)
+        criterion = torch.nn.NLLLoss()
 
-# setup net
-net = Net()
-net.apply(weights_init) # re-initialize net
-criterion = nn.NLLLoss()
-lr = 0.002
-optimizer = optim.SGD(net.parameters(), lr=lr)
-N_viz_iter = 2
-N_train_iter_per_viz = 250
+        # setup viz params
+        N_viz_iter = 20 # number of frames in the video
+        N_train_iter_per_viz = 250 # number of training steps per frame
 
-output = net(X).detach().numpy() # Nlayers x Nsamples x Nfeats
-n_layers = output.shape[0]
-z_offset = -z_step*((n_layers-3)/2)
+        # train the net, storing the embeddings on all layers at each step of optimization
+        embeddings, embeddings_nonsequential, losses = train.train(net, X, Y, grid_flat, N_viz_iter, N_train_iter_per_viz, optimizer, criterion)
 
-record_type = 'vid' # can't seem to get both video and individual frames to work simultaneously,
-                    #  so just select which type of recording you want here
+        # now visualize the embeddings as a video, showing how they change over steps of optimization
+        viz.viz_movie(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_flat, losses)
+    
+    elif args.viz_type == 'static':
+        # get the embeddings of the net
+        embeddings = net.forward(X).detach().numpy()
+        embeddings_nonsequential = net.forward_nonsequential(grid_flat).detach().numpy()
 
-# setup figure
-fig = plt.figure()
-fig.set_size_inches(48, 48, forward=True)
-ax = fig.add_subplot(111, projection='3d', proj_type = 'ortho', computed_zorder=False)
-ax.view_init(elev=35,azim=135)
-ax.dist=8
+        # now visualize the embeddings as a static plot
+        viz.viz_static(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_flat)
 
-# setup grid for visualization
-grid_us, grid_vs = np.meshgrid(np.linspace(min_u,max_u,num=2), np.linspace(min_v,max_v,num=2))
-
-# functions for training
-def init():
-    ax.set_xlim(min_u, max_u)
-    ax.set_ylim(min_v, max_v)
-    ax.set_zlim(-10, 10)  # Adjust if needed
-    return []
-
-def update(ii):
-    ax.cla()  # clear current frame
-    ax.view_init(elev=35, azim=135)
-    ax.dist = 8
-
-    loss = computeLoss(net, criterion, X, Y)
-    print(f'loss at frame {ii}: {loss:.4f}')
-
-    vizMapping(X, Y, grid_us, grid_vs, loss, z_offset, ax)
-
-    trainForABit(net, criterion, optimizer, X, Y, N_train_iter_per_viz)
-    return []
-
-ani = FuncAnimation(fig, update, frames=N_viz_iter, init_func=init, blit=False)
-
-ani.save(vid_dir + './animation.mp4', fps=60)
-
-!ffmpeg -y -i animation.mp4 -filter:v "crop=iw*0.4:ih*0.6:(iw*0.35):(ih*0.25)" -c:a copy animation_cropped.mp4
+    else:
+        raise ValueError(f"Visualization type {args.viz_type} not found")
