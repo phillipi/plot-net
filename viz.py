@@ -6,6 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.font_manager as font_manager
 from matplotlib.animation import FuncAnimation
+import subprocess
 
 matplotlib.use('Agg')
 
@@ -50,7 +51,7 @@ def vizMapping(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, g
         # plot data
         for i in range(embeddings.shape[1]):
             if Y is None:
-                color = np.array([0, 0, 255, 255])/255
+                color = np.array([255, 0, 0, 255])/255
             else:
               if Y[i]==0:
                   color = np.array([255, 0, 0, 255])/255
@@ -67,9 +68,10 @@ def vizMapping(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, g
         ax.text(0, 0, (n_layers+0.75)*z_step, 'Loss: {:.2f}'.format(loss), fontproperties=font_prop, bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.3'), ha='center', zorder=1000)
 
     # Set axis limits tightly around the net and keep axes equal
-    z_min, z_max = 0, np.maximum(n_layers,3)*z_step
+    z_min, z_max = 0, n_layers*z_step
     mid_z = (z_max + z_min) / 2.0
     half_range = (z_max - z_min) / 2.0
+    half_range = np.maximum(half_range, z_step*3)
     ax.set_xlim3d(0 - half_range/2, 0 + half_range/2)
     ax.set_ylim3d(0 - half_range/2, 0 + half_range/2)
     ax.set_zlim3d(mid_z - half_range/2, mid_z + half_range/2)
@@ -120,8 +122,24 @@ def viz_movie(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, gr
         init_func=viz_movie_init,
         blit=False
     )
-    ani.save('./animation.mp4', fps=60)
+    ani.save('./animation.gif', fps=60)
 
+    # Trim whitespace and add a white border to the animation using ImageMagick
+    import subprocess
+    try:
+        subprocess.run([
+            'magick',
+            'animation.gif',
+            '-coalesce',
+            '-trim',
+            '-bordercolor', 'white',
+            '-border', '100x100',
+            '-repage', '0x0',
+            '-layers', 'Optimize',
+            'animation_cropped.gif'
+        ], check=True)
+    except Exception as e:
+        print(f'Warning: Could not run magick to trim animation: {e}')
 
 
 def viz_static(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_flat):
@@ -146,5 +164,20 @@ def viz_static(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, g
     vizMapping(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_flat, None, z_step, ax)
 
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    plt.savefig('./{}.png'.format(net.__class__.__name__))
+    output_path = './{}.png'.format(net.__class__.__name__)
+    plt.savefig(output_path)
     
+    # Trim whitespace using ImageMagick convert
+    trimmed_path = './{}.png'.format(net.__class__.__name__)
+    try:
+        # Trim and add a small white border (e.g., 10 pixels)
+        subprocess.run([
+            'magick',
+            output_path,
+            '-trim',
+            '-bordercolor', 'white',
+            '-border', '100x100',
+            trimmed_path
+        ], check=True)
+    except Exception as e:
+        print(f'Warning: Could not run convert to trim image: {e}')

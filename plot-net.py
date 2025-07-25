@@ -9,6 +9,7 @@ if __name__ == "__main__":
     parser.add_argument('--which_dataset', type=str, default='gaussian_data', help='Dataset function to use from datasets module')
     parser.add_argument('--which_model', type=str, default='linear', help='Model class to use from models module')
     parser.add_argument('--viz_type', type=str, default='static', help='Type of visualization to use')
+    parser.add_argument('--movie_type', type=str, default='mp4', help='Type of movie to save')
     args = parser.parse_args()
 
     # seed (for replicability)
