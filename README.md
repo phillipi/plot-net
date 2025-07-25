@@ -21,7 +21,9 @@ Example:
 
 Output:
 
-![Image of linear layer should appear here](img/LinearLayer.png)
+<div align="center">
+  <img src="img/LinearLayer.png" alt="Image of a linear layer should appear here" width="350"/>
+</div>
 
 
 
@@ -33,6 +35,8 @@ Example:
 
 `python plot-net.py --which_dataset binary_classification --which_model MySimpleNet --viz_type training_movie`
 
-Output:
+Output (click to play the video):
 
-![Gif of training a net should appear here](animations/MySimpleNet.gif)
+<div align="center">
+  <a href="animations/MySimpleNet.mp4"><img src="img/MySimpleNet.png" alt="Link to video should appear here" width="400"/></a>
+</div>
