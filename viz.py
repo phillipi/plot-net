@@ -122,24 +122,30 @@ def viz_movie(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, gr
         init_func=viz_movie_init,
         blit=False
     )
-    ani.save('./animation.gif', fps=60)
 
-    # Trim whitespace and add a white border to the animation using ImageMagick
-    import subprocess
-    try:
-        subprocess.run([
-            'magick',
-            'animation.gif',
-            '-coalesce',
-            '-trim',
-            '-bordercolor', 'white',
-            '-border', '100x100',
-            '-repage', '0x0',
-            '-layers', 'Optimize',
-            'animation_cropped.gif'
-        ], check=True)
-    except Exception as e:
-        print(f'Warning: Could not run magick to trim animation: {e}')
+    if args.movie_type == 'mp4':
+        ani.save('./{}.mp4'.format(net.__class__.__name__), fps=60)
+    elif args.movie_type == 'gif':
+        ani.save('./{}.gif'.format(net.__class__.__name__), fps=60)
+
+        # Trim whitespace and add a white border to the animation using ImageMagick
+        import subprocess
+        try:
+            subprocess.run([
+                'magick',
+                'animation.gif',
+                '-coalesce',
+                '-trim',
+                '-bordercolor', 'white',
+                '-border', '100x100',
+                '-repage', '0x0',
+                '-layers', 'Optimize',
+                'animation_cropped.gif'
+            ], check=True)
+        except Exception as e:
+            print(f'Warning: Could not run magick to trim animation: {e}')
+    else:
+        raise ValueError('Invalid movie type: {}'.format(args.movie_type))
 
 
 def viz_static(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_flat):
