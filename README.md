@@ -38,5 +38,5 @@ Example:
 Output (click to play the video):
 
 <div align="center">
-  <a href="animations/MySimpleNet.mp4"><img src="img/MySimpleNet.png" alt="Link to video should appear here" width="400"/></a>
+  <a href="https://raw.githubusercontent.com/phillipi/plot-net/main/animations/MySimpleNet.mp4"><img src="img/MySimpleNet.png" alt="Link to video should appear here" width="400"/></a>
 </div>
