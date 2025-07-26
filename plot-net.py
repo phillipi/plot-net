@@ -12,6 +12,8 @@ if __name__ == "__main__":
     parser.add_argument('--d', type=int, default=2, help='Dimensionality of the data')
     parser.add_argument('--N_viz_iter', type=int, default=180, help='Number of frames in the video')
     parser.add_argument('--N_train_iter_per_viz', type=int, default=250, help='Number of training steps per frame')
+    parser.add_argument('--train', type=bool, default=False, help='Whether to train the net')
+    parser.add_argument('--rotate_camera', type=bool, default=False, help='Whether to rotate the camera')
     args = parser.parse_args()
 
     # seed (for replicability)
@@ -26,8 +28,7 @@ if __name__ == "__main__":
     # setup net
     net = models.mk_model(args.which_model, args.d)
 
-    if args.viz_type == 'training_movie':
-
+    if args.train == True:
         # setup optimizer
         lr = 0.002
         optimizer = torch.optim.SGD(net.parameters(), lr=lr)
@@ -36,15 +37,27 @@ if __name__ == "__main__":
         # train the net, storing the embeddings on all layers at each step of optimization
         embeddings, embeddings_nonsequential, losses = train.train(net, X, Y, grid, args.N_viz_iter, args.N_train_iter_per_viz, optimizer, criterion)
 
-        # now visualize the embeddings as a video, showing how they change over steps of optimization
-        viz.viz_movie(net, embeddings, embeddings_nonsequential, Y, grid, losses, args)
-    
-    elif args.viz_type == 'static':
-        # get the embeddings of the net
+        if args.viz_type == 'static':
+            embeddings = embeddings[-1]
+            embeddings_nonsequential = embeddings_nonsequential[-1]
+        
+    else:
+        # just run inference on the net to get the embeddings
         embeddings = net.forward(X).detach().numpy()
         embeddings_nonsequential = net.forward_nonsequential(grid).detach().numpy()
 
-        # now visualize the embeddings as a static plot
+        if args.viz_type == 'movie':
+            # replicate for args.N_viz_iter (this will just give a movie a static net, potentially with camera movement)
+            embeddings = np.repeat(embeddings[np.newaxis, :, :], args.N_viz_iter, axis=0)
+            embeddings_nonsequential = np.repeat(embeddings_nonsequential[np.newaxis, :, :], args.N_viz_iter, axis=0)
+            losses = np.zeros(args.N_viz_iter)
+
+    if args.viz_type == 'movie':
+        # visualize the embeddings as a video, showing how they change over steps of optimization
+        viz.viz_movie(net, embeddings, embeddings_nonsequential, Y, grid, losses, args)
+    
+    elif args.viz_type == 'static':
+        # visualize the embeddings as a static plot
         viz.viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args)
 
     else:

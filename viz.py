@@ -199,12 +199,14 @@ def viz_movie_init():
     return []
 
 
-def viz_movie_update(frame, net, embeddings, embeddings_nonsequential, Y, grid, losses, z_step, ax):
+def viz_movie_update(frame, net, embeddings, embeddings_nonsequential, Y, grid, losses, z_step, ax, args):
     
     print('rendering frame {} of {}'.format(frame, embeddings.shape[0]))
 
     ax.cla()  # clear current frame
-    ax.view_init(elev=35, azim=135+180+frame*2)
+    if args.rotate_camera == True:
+        ax.view_init(elev=35, azim=135+180+frame*2)
+
 
     if net.d == 2:
         vizMapping2D(net, embeddings[frame], embeddings_nonsequential[frame], Y, grid, losses[frame], z_step, ax)
@@ -245,7 +247,7 @@ def viz_movie(net, embeddings, embeddings_nonsequential, Y, grid, losses, args):
         fig,
         viz_movie_update,
         frames=embeddings.shape[0],
-        fargs=(net, embeddings, embeddings_nonsequential, Y, grid, losses, z_step, ax),
+        fargs=(net, embeddings, embeddings_nonsequential, Y, grid, losses, z_step, ax, args),
         init_func=viz_movie_init,
         blit=False
     )
