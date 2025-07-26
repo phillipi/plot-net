@@ -33,7 +33,7 @@ Output:
   <img src="img/LinearLayer.png" alt="Image of a linear layer should appear here" width="350"/>
 </div>
 
-### 2) Train a model on some 2D data and visualize the evolution of the embeddings over iters as a movie
+### 2) Train a model on some 2D data and visualize the evolution of the embeddings over iters as a movie:
 
 `python plot-net.py --which_dataset binary_classification --which_model MySimpleNet --d 2 --train True --viz_type movie`
 
@@ -43,14 +43,14 @@ Output (click to play the video):
   <a href="https://web.mit.edu/phillipi/www/plot-net/MySimpleNet.mp4"><img src="img/MySimpleNet.png" alt="Link to video should appear here" width="400"/></a>
 </div>
 
-### 3) Train a model on some 3D data and visualize the evolution of the embeddings over iters as a movie, with rotating camera
+### 3) Train a model on some 3D data and visualize the evolution of the embeddings over iters as a movie, with rotating camera:
 
 `python plot-net.py --which_dataset ternary_classification --which_model SimpleResnet --d 3 --train True --viz_type movie --rotate_camera True`
 
 Output (click to play the video):
 
 <div align="center">
-  <a href="https://web.mit.edu/phillipi/www/plot-net/SimpleResnet_1.mp4"><img src="img/SimpleResnet_1.png" alt="Link to video should appear here" width="500"/></a>
+  <a href="https://web.mit.edu/phillipi/www/plot-net/SimpleResnet_1.mp4"><img src="img/SimpleResnet_1.png" alt="Link to video should appear here" width="600"/></a>
 </div>
 
 
