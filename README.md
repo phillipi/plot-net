@@ -12,7 +12,7 @@ pip install torch matplotlib numpy
 ```
 
 ## Usage
-`python plot-net.py --which_dataset <dataset_name> --which_model <model_name> --d 2 --train <True, False> --viz_type <static, movie>`
+`python plot-net.py --which_dataset <dataset_name> --which_model <model_name> --d <2,3> --train <True, False> --viz_type <static, movie>`
 
 * `dataset_name`: See `mk_dataset` in `datasets.py` for options.
 * `model_name`: See `mk_model` in `models.py` for options.
