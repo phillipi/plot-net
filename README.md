@@ -35,7 +35,7 @@ Output:
 
 ### 2) Train a model on some 2D data and visualize the evolution of the embeddings over iters as a movie:
 
-`python plot-net.py --which_dataset binary_classification --which_model MySimpleNet --d 2 --train True --viz_type movie`
+`python plot-net.py --which_dataset binary_classification --which_model MySimpleNet --d 2 --train True --viz_type movie --N_viz_iter 60 --N_train_iter_per_viz 250`
 
 Output (click to play the video):
 
