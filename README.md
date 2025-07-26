@@ -17,7 +17,7 @@ pip install torch matplotlib numpy
 * `dataset_name`: See `mk_dataset` in `datasets.py` for options.
 * `model_name`: See `mk_model` in `models.py` for options.
 * `d`: dimensionality of the data (and width of the model); supported options are 2 or 3; most datasets and models should automatically scale to the specified d.
-* `Train`: train the net or just run it from init? 
+* `train`: train the net or just run it from init? 
 * `viz_type`: `static` runs one forward pass and outputs an image of the embeddings; `training_movie` trains the model on the data and outputs a movie of the embeddings over training iters.
 * See `plot-net.py` for additional command line arguments.
 
@@ -35,7 +35,7 @@ Output:
 
 ### 2) Train a model on some 2D data and visualize the evolution of the embeddings over iters as a movie:
 
-`python plot-net.py --which_dataset binary_classification --which_model MySimpleNet --d 2 --train --viz_type movie --N_viz_iter 60 --N_train_iter_per_viz 150`
+`python plot-net.py --which_dataset binary_classification --which_model MySimpleNet --d 2 --train True --viz_type movie --N_viz_iter 60 --N_train_iter_per_viz 150`
 
 Output (click to play the video):
 
@@ -45,7 +45,7 @@ Output (click to play the video):
 
 ### 3) Train a model on some 3D data and visualize the evolution of the embeddings over iters as a movie, with rotating camera:
 
-`python plot-net.py --which_dataset ternary_classification --which_model SimpleResnet --d 3 --train --viz_type movie --rotate_camera`
+`python plot-net.py --which_dataset ternary_classification --which_model SimpleResnet --d 3 --train True --viz_type movie --rotate_camera True`
 
 Output (click to play the video):
 
