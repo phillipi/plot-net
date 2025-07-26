@@ -50,7 +50,7 @@ Output (click to play the video):
 Output (click to play the video):
 
 <div align="center">
-  <a href="https://web.mit.edu/phillipi/www/plot-net/SimpleResnet_1.mp4"><img src="img/SimpleResnet_1.png" alt="Link to video should appear here" width="600"/></a>
+  <a href="https://web.mit.edu/phillipi/www/plot-net/SimpleResnet_1.mp4"><img src="img/SimpleResnet_1.png" alt="Link to video should appear here" width="500"/></a>
 </div>
 
 
