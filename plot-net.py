@@ -10,6 +10,8 @@ if __name__ == "__main__":
     parser.add_argument('--which_model', type=str, default='linear', help='Model class to use from models module')
     parser.add_argument('--viz_type', type=str, default='static', help='Type of visualization to use')
     parser.add_argument('--d', type=int, default=2, help='Dimensionality of the data')
+    parser.add_argument('--N_viz_iter', type=int, default=180, help='Number of frames in the video')
+    parser.add_argument('--N_train_iter_per_viz', type=int, default=250, help='Number of training steps per frame')
     args = parser.parse_args()
 
     # seed (for replicability)
@@ -31,12 +33,8 @@ if __name__ == "__main__":
         optimizer = torch.optim.SGD(net.parameters(), lr=lr)
         criterion = torch.nn.NLLLoss()
 
-        # setup viz params
-        N_viz_iter = 180 # number of frames in the video
-        N_train_iter_per_viz = 250 # number of training steps per frame
-
         # train the net, storing the embeddings on all layers at each step of optimization
-        embeddings, embeddings_nonsequential, losses = train.train(net, X, Y, grid, N_viz_iter, N_train_iter_per_viz, optimizer, criterion)
+        embeddings, embeddings_nonsequential, losses = train.train(net, X, Y, grid, args.N_viz_iter, args.N_train_iter_per_viz, optimizer, criterion)
 
         # now visualize the embeddings as a video, showing how they change over steps of optimization
         viz.viz_movie(net, embeddings, embeddings_nonsequential, Y, grid, losses, args)
