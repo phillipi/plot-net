@@ -46,7 +46,12 @@ class Net(torch.nn.Module):
         return output
 
     def weights_init(self, m):
-        pass
+        # init to identity for clearer visualization
+        if isinstance(m, torch.nn.Linear):
+            m.reset_parameters()
+            torch.nn.init.eye_(m.weight.data)
+            if m.bias is not None:
+                torch.nn.init.zeros_(m.bias)
 
     def loss(self, X, Y, criterion):
         output = self.forward(X)
@@ -74,13 +79,33 @@ class MySimpleNet(Net):
 
         self.apply(self.weights_init)
 
-    def weights_init(self, m):
-        # init to identity for clearer visualization
-        if isinstance(m, torch.nn.Linear):
-            m.reset_parameters()
-            torch.nn.init.eye_(m.weight.data)
-            if m.bias is not None:
-                torch.nn.init.zeros_(m.bias)
+
+# Example simple resnet
+class ResidualBlock(torch.nn.Module):
+    def __init__(self, d):
+        super(ResidualBlock, self).__init__()
+        self.linear = torch.nn.Linear(d, d)
+        self.relu = torch.nn.ReLU()
+    
+    def forward(self, x):
+        residual = x
+        out = self.linear(x)
+        out = self.relu(out)
+        return out + 0.1*residual
+
+class SimpleResnet(Net):
+    def __init__(self, d=2):
+        super(SimpleResnet, self).__init__(d)
+
+        self.residual1 = ResidualBlock(d)
+        self.residual2 = ResidualBlock(d)
+        self.residual3 = ResidualBlock(d)
+        self.residual4 = ResidualBlock(d)
+        self.l1 = torch.nn.Linear(d, d)
+        self.softmax = torch.nn.Softmax(dim=1)
+
+        self.apply(self.weights_init)
+
 
 class LinearLayer(Net):
     def __init__(self, d=2):
@@ -148,6 +173,8 @@ class SoftmaxLayer(Net):
 def mk_model(which_model, d=2):
     if which_model == 'MySimpleNet':
         return MySimpleNet(d)
+    elif which_model == 'SimpleResnet':
+        return SimpleResnet(d)
     elif which_model == 'linear':
         return LinearLayer(d)
     elif which_model == 'relu':

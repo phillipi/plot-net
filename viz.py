@@ -21,18 +21,16 @@ my_colors_3 = np.array([
     (0.937, 0.357, 0.357, 1.0)   # #ef5b5b (coral red)
 ])
 
-def vizMapping2D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_flat, loss, z_step, ax):
+def vizMapping2D(net, embeddings, embeddings_nonsequential, Y, grid, loss, z_step, ax):
     """
     Visualize how the network transforms the input data distribution layer by layer.
 
     Args:
         embeddings:[x, f1(x), f2(f1(x)), ...], where fi is layer i, (Nlayers x Nsamples x 2)
         embeddings_nonsequential: [x, f1(x), f2(x), ...], where fi is layer i, (Nlayers x Nsamples x 2)
-        grid_us: Grid of u values
-        grid_vs: Grid of v values
-        grid_flat: Flattened grid of inputs
+        grid: Flattened grid of inputs
         loss: Loss value (optional)
-        z_offset: Offset for the z-axis
+        z_step: Step size for layer separation
         ax: Axis to plot on
     """
 
@@ -44,6 +42,10 @@ def vizMapping2D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs,
     for l in range(n_layers+1):
 
         # plot grid
+        grid_reshaped = grid.reshape(2, 2, 2)  # Reshape to 2x2 grid
+        grid_us = grid_reshaped[:,:,0]
+        grid_vs = grid_reshaped[:,:,1]
+        
         ax.plot_wireframe(np.reshape(embeddings_nonsequential[l,:,0],[2,2]), np.reshape(-embeddings_nonsequential[l,:,1],[2,2]), (l*z_step)*np.ones_like(np.reshape(embeddings_nonsequential[l,:,0],[2,2])), rcount=1, ccount=1, color = [0.7,0.7,0.7], linewidth=3.0, linestyle='--', zorder=2*l+0.0001)
         ax.plot_surface(grid_us, grid_vs, (l*z_step)*np.ones_like(grid_us), rcount=1, ccount=1, color = [1.0,1.0,1.0], shade=False, linewidth=0, zorder=2*l+0.001,alpha=0.75)
         ax.plot_wireframe(grid_us, grid_vs, (l*z_step)*np.ones_like(grid_us), rcount=1, ccount=1, color = [0.3,0.3,0.3], linewidth=6.0, zorder=2*l+0.01)
@@ -53,7 +55,7 @@ def vizMapping2D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs,
         # plot grid mapping
         if l<n_layers:
             for i in range(0,embeddings_nonsequential.shape[1],1):
-                ax.plot([grid_flat[i,0], embeddings_nonsequential[l+1,i,0]], [-grid_flat[i,1], -embeddings_nonsequential[l+1,i,1]], [l*z_step, (l+1)*z_step], '--', marker = 'o', color = [0.7, 0.7, 0.7], linewidth=3, markersize=10, zorder=2*l+1)#, alpha=.1)
+                ax.plot([grid[i,0], embeddings_nonsequential[l+1,i,0]], [-grid[i,1], -embeddings_nonsequential[l+1,i,1]], [l*z_step, (l+1)*z_step], '--', marker = 'o', color = [0.7, 0.7, 0.7], linewidth=3, markersize=10, zorder=2*l+1)#, alpha=.1)
                 ax.scatter(embeddings_nonsequential[l+1,i,0], -embeddings_nonsequential[l+1,i,1], (l+1)*z_step, marker = '>', color = [0.1, 0.1, 0.1], s=80, zorder=2*l+1.01)
 
             # display layer name
@@ -91,14 +93,13 @@ def vizMapping2D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs,
     ax.set_zlim3d(mid_z - half_range/2, mid_z + half_range/2)
     ax.set_axis_off()
 
-def vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_ws, grid_flat, loss, z_step, ax):
+def vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid, loss, z_step, ax):
     """
     Visualize how the network transforms the input data distribution layer by layer (3D version).
     Args:
         embeddings: [x, f1(x), f2(f1(x)), ...], (Nlayers x Nsamples x 3)
         embeddings_nonsequential: [x, f1(x), f2(x), ...], (Nlayers x Nsamples x 3)
-        grid_us, grid_vs, grid_ws: 3D meshgrids
-        grid_flat: Flattened grid of inputs
+        grid: Flattened grid of inputs
         loss: Loss value (optional)
         z_step: Step size for layer separation
         ax: Axis to plot on
@@ -130,9 +131,9 @@ def vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs,
             ax.plot([x[i], x[j]], [y[i], y[j]], [z[i], z[j]], color = [0.2,0.2,0.2], linewidth=3.0, linestyle='--', zorder=2*l+.0001)
         
         # plot axes box
-        x = grid_flat[:,0]
-        y = -grid_flat[:,1]
-        z = grid_flat[:,2] + (l*z_step)
+        x = grid[:,0]
+        y = -grid[:,1]
+        z = grid[:,2] + (l*z_step)
 
         # The 8 corners of the box, ordered consistently
         verts = list(zip(x, y, z))
@@ -152,21 +153,10 @@ def vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs,
         from mpl_toolkits.mplot3d.art3d import Poly3DCollection
         ax.add_collection3d(Poly3DCollection(poly3d, edgecolor = [0.7,0.7,0.7, 1], facecolor = [1,1,1, 0.2], linewidth=3.0, linestyle='-', zorder=2*l+.0001))
 
-        '''
-        ax.plot_surface(grid_us[:,:,0], grid_vs[:,:,0], (l*z_step)*np.ones_like(grid_us[:,:,0]), rcount=1, ccount=1, color = [1.0,1.0,1.0], shade=False, linewidth=0, zorder=2*l+0.001,alpha=0.75)
-        ax.plot_wireframe(grid_us[:,:,0], grid_vs[:,:,0], (l*z_step)*np.ones_like(grid_us[:,:,0]), rcount=1, ccount=1, color = [0.3,0.3,0.3], linewidth=6.0, zorder=2*l+0.01)
-        ax.plot([min_u,max_u],[0,0],[l*z_step,l*z_step], color=[0.5,0.5,0.5], linewidth=4.0, zorder=2*l)
-        ax.plot([0,0],[min_v,max_v],[l*z_step,l*z_step], color=[0.5,0.5,0.5], linewidth=4.0, zorder=2*l)
-
-        ax.plot_surface((grid_us[0,:,:]+grid_us[1,:,:])/2, (grid_vs[0,:,:]+grid_vs[1,:,:])/2, (grid_ws[0,:,:]+grid_ws[1,:,:])/2+(l*z_step)*np.ones_like(grid_us[0,:,:]), rcount=1, ccount=1, color = [1.0,1.0,1.0], shade=False, linewidth=0, zorder=2*l+0.001,alpha=0.75)
-        ax.plot_wireframe((grid_us[0,:,:]+grid_us[1,:,:])/2, (grid_vs[0,:,:]+grid_vs[1,:,:])/2, (grid_ws[0,:,:]+grid_ws[1,:,:])/2+(l*z_step)*np.ones_like(grid_us[0,:,:]), rcount=1, ccount=1, color = [0.3,0.3,0.3], linewidth=6.0, zorder=2*l+0.01)
-        ax.plot([0,0],[0,0],[l*z_step+min_w,l*z_step+max_w], color=[0.5,0.5,0.5], linewidth=4.0, zorder=2*l)
-        '''
-
         # plot grid mapping
         if l<n_layers:
-            for i in range(0,grid_flat.shape[0]):
-                ax.plot([grid_flat[i,0], embeddings_nonsequential[l+1,i,0]], [-grid_flat[i,1], -embeddings_nonsequential[l+1,i,1]], [grid_flat[i,2]+l*z_step, embeddings_nonsequential[l+1,i,2]+(l+1)*z_step], '--', marker = 'o', color = [0.2, 0.2, 0.2], linewidth=3, markersize=10, zorder=2*l+1)#, alpha=.1)
+            for i in range(0,grid.shape[0]):
+                ax.plot([grid[i,0], embeddings_nonsequential[l+1,i,0]], [-grid[i,1], -embeddings_nonsequential[l+1,i,1]], [grid[i,2]+l*z_step, embeddings_nonsequential[l+1,i,2]+(l+1)*z_step], '--', marker = 'o', color = [0.2, 0.2, 0.2], linewidth=3, markersize=10, zorder=2*l+1)#, alpha=.1)
                 ax.scatter(embeddings_nonsequential[l+1,i,0], -embeddings_nonsequential[l+1,i,1], embeddings_nonsequential[l+1,i,2]+(l+1)*z_step, marker = '>', color = [0.2, 0.2, 0.2], s=80, zorder=2*l+1.01)
             
             # display layer name
@@ -209,7 +199,7 @@ def viz_movie_init():
     return []
 
 
-def viz_movie_update(frame, net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_ws, grid_flat, losses, z_step, ax):
+def viz_movie_update(frame, net, embeddings, embeddings_nonsequential, Y, grid, losses, z_step, ax):
     
     print('rendering frame {} of {}'.format(frame, embeddings.shape[0]))
 
@@ -217,16 +207,16 @@ def viz_movie_update(frame, net, embeddings, embeddings_nonsequential, Y, grid_u
     ax.view_init(elev=35, azim=135+180+frame*2)
 
     if net.d == 2:
-        vizMapping2D(net, embeddings[frame], embeddings_nonsequential[frame], Y, grid_us, grid_vs, grid_flat, losses[frame], z_step, ax)
+        vizMapping2D(net, embeddings[frame], embeddings_nonsequential[frame], Y, grid, losses[frame], z_step, ax)
     elif net.d == 3:
-        vizMapping3D(net, embeddings[frame], embeddings_nonsequential[frame], Y, grid_us, grid_vs, grid_ws, grid_flat, losses[frame], z_step, ax)
+        vizMapping3D(net, embeddings[frame], embeddings_nonsequential[frame], Y, grid, losses[frame], z_step, ax)
     else:
         raise ValueError('Invalid dimensionality: {}'.format(net.d))
 
     return []
 
 
-def viz_movie(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_ws, grid_flat, losses, args):
+def viz_movie(net, embeddings, embeddings_nonsequential, Y, grid, losses, args):
     """
     Visualize the embeddings of a neural net over the course of training, at multiple checkpoints.
     Args:
@@ -240,7 +230,7 @@ def viz_movie(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, gr
     if net.d == 2:
         z_step = 3.2
     elif net.d == 3:
-        z_step = 5.2
+        z_step = 8.2
     fig = plt.figure()
     fig.set_size_inches(48, 48, forward=True)
     ax = fig.add_subplot(111, projection='3d', proj_type='ortho', computed_zorder=False)
@@ -255,37 +245,15 @@ def viz_movie(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, gr
         fig,
         viz_movie_update,
         frames=embeddings.shape[0],
-        fargs=(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_ws, grid_flat, losses, z_step, ax),
+        fargs=(net, embeddings, embeddings_nonsequential, Y, grid, losses, z_step, ax),
         init_func=viz_movie_init,
         blit=False
     )
 
-    if args.movie_type == 'mp4':
-        ani.save('./{}.mp4'.format(net.__class__.__name__), fps=60)
-    elif args.movie_type == 'gif':
-        ani.save('./{}.gif'.format(net.__class__.__name__), fps=60)
-
-        # Trim whitespace and add a white border to the animation using ImageMagick
-        import subprocess
-        try:
-            subprocess.run([
-                'magick',
-                'animation.gif',
-                '-coalesce',
-                '-trim',
-                '-bordercolor', 'white',
-                '-border', '100x100',
-                '-repage', '0x0',
-                '-layers', 'Optimize',
-                'animation_cropped.gif'
-            ], check=True)
-        except Exception as e:
-            print(f'Warning: Could not run magick to trim animation: {e}')
-    else:
-        raise ValueError('Invalid movie type: {}'.format(args.movie_type))
+    ani.save('./{}.mp4'.format(net.__class__.__name__), fps=60)
 
 
-def viz_static(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_ws, grid_flat, args):
+def viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args):
     """
     Visualize the embeddings of a neural net at one checkpoint.
 
@@ -300,7 +268,7 @@ def viz_static(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, g
     if net.d == 2:
         z_step = 3.2
     elif net.d == 3:
-        z_step = 5.2
+        z_step = 8.2
     fig = plt.figure()
     fig.set_size_inches(48, 48, forward=True)
     ax = fig.add_subplot(111, projection='3d', proj_type='ortho', computed_zorder=False)
@@ -311,9 +279,9 @@ def viz_static(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, g
     ax.dist=8
 
     if net.d == 2:
-        vizMapping2D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_flat, None, z_step, ax)
+        vizMapping2D(net, embeddings, embeddings_nonsequential, Y, grid, None, z_step, ax)
     elif net.d == 3:
-        vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid_us, grid_vs, grid_ws, grid_flat, None, z_step, ax)
+        vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid, None, z_step, ax)
     else:
         raise ValueError('Invalid dimensionality: {}'.format(net.d))
 

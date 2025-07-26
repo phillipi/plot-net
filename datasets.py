@@ -59,7 +59,7 @@ def mk_ternary_classification(d=3):
     return X, Y
 
 def mk_gaussian_data(d=2):
-    Nsamples = 50
+    Nsamples = 100
 
     # d-dimensional mean and custom diagonal covariance
     mean = np.zeros(d)
@@ -87,6 +87,12 @@ def mk_dataset(which_dataset, d):
 
 # create data on a grid
 def mk_grid_data(d=2):
+    """
+    Creates a grid of xyz inputs for the model
+
+    Returns:
+      grid: Ngridpoints x 3
+    """
 
     # setup grid of inputs
     min_val, max_val = -1, 1
@@ -94,8 +100,8 @@ def mk_grid_data(d=2):
     mesh = np.meshgrid(*grid_axes, indexing='ij'
     )
     # create flattened data for samples in grid
-    grid_flat = np.stack(mesh, axis=-1)
-    grid_flat = np.reshape(grid_flat, (-1, d)) # grid_flat: Nsamples x Nfeats
-    grid_flat = torch.tensor(grid_flat.astype(np.float32))
+    grid = np.stack(mesh, axis=-1)
+    grid = np.reshape(grid, (-1, d)) # grid: Nsamples x Nfeats
+    grid = torch.tensor(grid.astype(np.float32))
 
-    return (*mesh, grid_flat)
+    return grid
