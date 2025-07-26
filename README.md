@@ -40,7 +40,7 @@ Output:
 Output (click to play the video):
 
 <div align="center">
-  <a href="https://web.mit.edu/phillipi/www/plot-net/MySimpleNet.mp4"><img src="img/MySimpleNet.png" alt="Link to video should appear here" width="400"/></a>
+  <a href="https://web.mit.edu/phillipi/www/plot-net/MySimpleNet.mp4"><img src="img/MySimpleNet.png" alt="Link to video should appear here" width="450"/></a>
 </div>
 
 ### 3) Train a model on some 3D data and visualize the evolution of the embeddings over iters as a movie, with rotating camera:
@@ -50,7 +50,7 @@ Output (click to play the video):
 Output (click to play the video):
 
 <div align="center">
-  <a href="https://web.mit.edu/phillipi/www/plot-net/SimpleResnet.mp4"><img src="img/SimpleResnet.png" alt="Link to video should appear here" width="400"/></a>
+  <a href="https://web.mit.edu/phillipi/www/plot-net/SimpleResnet.mp4"><img src="img/SimpleResnet.png" alt="Link to video should appear here" width="350"/></a>
 </div>
 
 
