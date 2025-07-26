@@ -24,7 +24,7 @@ pip install torch matplotlib numpy
 
 ### 1) Run a model on some 2D data and visualize the embeddings as an image:
 
-`python plot-net.py --which_dataset gaussian_data --which_model linear --viz_type static`
+`python plot-net.py --which_dataset gaussian_data --which_model linear --viz_type static --d 2`
 
 Output:
 
@@ -34,7 +34,7 @@ Output:
 
 ### 2) Train a model on some 2D data and visualize the evolution of the embeddings over iters as a movie
 
-`python plot-net.py --which_dataset binary_classification --which_model MySimpleNet --viz_type training_movie`
+`python plot-net.py --which_dataset binary_classification --which_model MySimpleNet --viz_type training_movie --d 2`
 
 Output (click to play the video):
 
@@ -44,12 +44,12 @@ Output (click to play the video):
 
 ### 3) Train a model on some 2D data and visualize the evolution of the embeddings over iters as a movie
 
-`python plot-net.py --which_dataset binary_classification --which_model MySimpleNet --viz_type training_movie`
+`python plot-net.py --which_dataset ternary_classification --which_model SimpleResnet --viz_type training_movie --d 3`
 
 Output (click to play the video):
 
 <div align="center">
-  <a href="https://web.mit.edu/phillipi/www/plot-net/SimpleResnet_1.mp4"><img src="img/SimpleResnet_1.png" alt="Link to video should appear here" width="400"/></a>
+  <a href="https://web.mit.edu/phillipi/www/plot-net/SimpleResnet_1.mp4"><img src="img/SimpleResnet_1.png" alt="Link to video should appear here" width="500"/></a>
 </div>
 
 
