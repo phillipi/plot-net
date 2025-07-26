@@ -128,7 +128,7 @@ def vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid, loss, z_ste
 
         # Plot each edge
         for i, j in edges:
-            ax.plot([x[i], x[j]], [y[i], y[j]], [z[i], z[j]], color = [0.2,0.2,0.2], linewidth=3.0, linestyle='--', zorder=2*l+.0001)
+            ax.plot([x[i], x[j]], [y[i], y[j]], [z[i], z[j]], color = [0.7,0.7,0.7], linewidth=3.0, linestyle='--', zorder=2*l+.0001)
         
         # plot axes box
         x = grid[:,0]
@@ -151,17 +151,19 @@ def vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid, loss, z_ste
         # Create a 3D polygon collection
         poly3d = [[verts[i] for i in face] for face in faces]
         from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-        ax.add_collection3d(Poly3DCollection(poly3d, edgecolor = [0.7,0.7,0.7, 1], facecolor = [1,1,1, 0.2], linewidth=3.0, linestyle='-', zorder=2*l+.0001))
+        ax.add_collection3d(Poly3DCollection(poly3d, edgecolor = [0.2,0.2,0.2, 1], facecolor = [1,1,1, 0.0], linewidth=3.0, linestyle='-', zorder=2*l+.0001))
 
         # plot grid mapping
         if l<n_layers:
             for i in range(0,grid.shape[0]):
                 ax.plot([grid[i,0], embeddings_nonsequential[l+1,i,0]], [-grid[i,1], -embeddings_nonsequential[l+1,i,1]], [grid[i,2]+l*z_step, embeddings_nonsequential[l+1,i,2]+(l+1)*z_step], '--', marker = 'o', color = [0.2, 0.2, 0.2], linewidth=3, markersize=10, zorder=2*l+1)#, alpha=.1)
-                ax.scatter(embeddings_nonsequential[l+1,i,0], -embeddings_nonsequential[l+1,i,1], embeddings_nonsequential[l+1,i,2]+(l+1)*z_step, marker = '>', color = [0.2, 0.2, 0.2], s=80, zorder=2*l+1.01)
+                ax.scatter(embeddings_nonsequential[l+1,i,0], -embeddings_nonsequential[l+1,i,1], embeddings_nonsequential[l+1,i,2]+(l+1)*z_step, marker = '>', color = [0.7, 0.7, 0.7], s=80, zorder=2*l+1.01)
             
             # display layer name
             font_prop = font_manager.FontProperties(size=42)
-            ax.text(z_step/3, z_step/3, (l+0.5)*z_step, net.get_layer_name(l), fontproperties=font_prop, bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.3'), ha = 'center', zorder=1000)
+            #for 180 degree view: ax.text(z_step/3, z_step/3, (l+0.5)*z_step, net.get_layer_name(l), fontproperties=font_prop, bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.3'), ha = 'center', zorder=1000)
+            #for 90 degree view:
+            ax.text(0, -z_step/1.5, (l+1)*z_step, net.get_layer_name(l), fontproperties=font_prop, bbox=dict(facecolor='white', edgecolor='none', boxstyle='round,pad=0.3'), ha = 'center', zorder=1000)
 
         # plot data
         for i in range(embeddings.shape[1]):
@@ -176,8 +178,8 @@ def vizMapping3D(net, embeddings, embeddings_nonsequential, Y, grid, loss, z_ste
                 raise ValueError('Invalid dimensionality: {}'.format(net.d))
 
             if l<n_layers:
-                ax.plot([embeddings[l,i,0], embeddings[l+1,i,0]], [-embeddings[l,i,1], -embeddings[l+1,i,1]], [embeddings[l,i,2]+l*z_step, embeddings[l+1,i,2]+(l+1)*z_step], '--', marker = '.', color=color, linewidth=3, markersize=0, zorder=2*l+1, alpha=.5)
-            ax.scatter(embeddings[l,i,0], -embeddings[l,i,1], embeddings[l,i,2]+l*z_step, color=color, s=160, alpha=1, linewidth=0, zorder=2*l+1.01)
+                ax.plot([embeddings[l,i,0], embeddings[l+1,i,0]], [-embeddings[l,i,1], -embeddings[l+1,i,1]], [embeddings[l,i,2]+l*z_step, embeddings[l+1,i,2]+(l+1)*z_step], ':', marker = '.', color=color, linewidth=3, markersize=0, zorder=2*l+1, alpha=.5)
+            ax.scatter(embeddings[l,i,0], -embeddings[l,i,1], embeddings[l,i,2]+l*z_step, color=color, s=160, alpha=0.65, linewidth=0, zorder=2*l+1.01)
 
     # display loss
     if loss is not None:
@@ -204,8 +206,8 @@ def viz_movie_update(frame, net, embeddings, embeddings_nonsequential, Y, grid, 
     print('rendering frame {} of {}'.format(frame, embeddings.shape[0]))
 
     ax.cla()  # clear current frame
-    if args.rotate_camera == True:
-        ax.view_init(elev=35, azim=135+180+frame*2)
+    if args.rotate_camera == 'True':
+        ax.view_init(elev=35, azim=135+90+frame*2)
 
 
     if net.d == 2:
@@ -232,14 +234,14 @@ def viz_movie(net, embeddings, embeddings_nonsequential, Y, grid, losses, args):
     if net.d == 2:
         z_step = 3.2
     elif net.d == 3:
-        z_step = 8.2
+        z_step = 7.2
     fig = plt.figure()
     fig.set_size_inches(48, 48, forward=True)
     ax = fig.add_subplot(111, projection='3d', proj_type='ortho', computed_zorder=False)
     if net.d == 2:
         ax.view_init(elev=35,azim=135)
     elif net.d == 3:
-        ax.view_init(elev=35,azim=135+180)
+        ax.view_init(elev=35,azim=135+90)
     ax.dist=8
 
     # visualize all the embeddings at each step of optimization
@@ -270,14 +272,14 @@ def viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args):
     if net.d == 2:
         z_step = 3.2
     elif net.d == 3:
-        z_step = 8.2
+        z_step = 7.2
     fig = plt.figure()
     fig.set_size_inches(48, 48, forward=True)
     ax = fig.add_subplot(111, projection='3d', proj_type='ortho', computed_zorder=False)
     if net.d == 2:
         ax.view_init(elev=35,azim=135)
     elif net.d == 3:
-        ax.view_init(elev=35,azim=135+180)
+        ax.view_init(elev=35,azim=135+90)
     ax.dist=8
 
     if net.d == 2:

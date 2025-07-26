@@ -12,8 +12,8 @@ if __name__ == "__main__":
     parser.add_argument('--d', type=int, default=2, help='Dimensionality of the data')
     parser.add_argument('--N_viz_iter', type=int, default=180, help='Number of frames in the video')
     parser.add_argument('--N_train_iter_per_viz', type=int, default=250, help='Number of training steps per frame')
-    parser.add_argument('--train', type=bool, default=False, help='Whether to train the net')
-    parser.add_argument('--rotate_camera', type=bool, default=False, help='Whether to rotate the camera')
+    parser.add_argument('--train', type=str, default='False', help='Whether to train the net')
+    parser.add_argument('--rotate_camera', type=str, default='False', help='Whether to rotate the camera')
     args = parser.parse_args()
 
     # seed (for replicability)
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # setup net
     net = models.mk_model(args.which_model, args.d)
 
-    if args.train == True:
+    if args.train == 'True':
         # setup optimizer
         lr = 0.002
         optimizer = torch.optim.SGD(net.parameters(), lr=lr)
