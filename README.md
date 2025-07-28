@@ -19,7 +19,14 @@ pip install torch matplotlib numpy plotly
 * `d`: dimensionality of the data (and width of the model); supported options are 2 or 3; most datasets and models should automatically scale to the specified d.
 * `train`: train the net or just run it from init? 
 * `viz_type`: `static` runs one forward pass and outputs an image of the embeddings; `training_movie` trains the model on the data and outputs a movie of the embeddings over training iters.
+* `renderer`: `matplotlib`, `plotly`, or `threejs`
 * See `plot-net.py` for additional command line arguments.
+
+For `threejs` visualization, the webpage files are saved to `./threejs/`. You may need an http server. You can run one locally like:
+```
+python3 -m http.server 8000
+```
+Then navigate your browser to http://localhost:8000/.
 
 ## Examples
 
