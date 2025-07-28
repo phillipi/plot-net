@@ -24,6 +24,7 @@ pip install torch matplotlib numpy plotly
 
 For `threejs` visualization, the webpage files are saved to `./threejs/`. You may need an http server. You can run one locally like:
 ```
+cd threejs
 python3 -m http.server 8000
 ```
 Then navigate your browser to http://localhost:8000/.
