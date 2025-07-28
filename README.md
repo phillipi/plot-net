@@ -8,7 +8,7 @@ cd plot-net
 
 python3 -m venv venv
 source venv/bin/activate
-pip install torch matplotlib numpy
+pip install torch matplotlib numpy plotly
 ```
 
 ## Usage

@@ -1,19 +1,20 @@
 # imports
 import numpy as np
 import torch
-import models, train, viz, datasets
+import models, train, viz_matplotlib, viz_plotly,viz_threejs, datasets
 import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Plot-Net Visualization")
     parser.add_argument('--which_dataset', type=str, default='gaussian_data', help='Dataset function to use from datasets module')
     parser.add_argument('--which_model', type=str, default='linear', help='Model class to use from models module')
-    parser.add_argument('--viz_type', type=str, default='static', help='Type of visualization to use')
+    parser.add_argument('--viz_type', type=str, default='static', help='Type of visualization to use (static, movie)')
     parser.add_argument('--d', type=int, default=2, help='Dimensionality of the data')
     parser.add_argument('--N_viz_iter', type=int, default=180, help='Number of frames in the video')
     parser.add_argument('--N_train_iter_per_viz', type=int, default=250, help='Number of training steps per frame')
     parser.add_argument('--train', type=str, default='False', help='Whether to train the net')
     parser.add_argument('--rotate_camera', type=str, default='False', help='Whether to rotate the camera')
+    parser.add_argument('--renderer', type=str, default='matplotlib', help='Renderer to use (matplotlib, threejs, plotly)')
     args = parser.parse_args()
 
     # seed (for replicability)
@@ -54,11 +55,21 @@ if __name__ == "__main__":
 
     if args.viz_type == 'movie':
         # visualize the embeddings as a video, showing how they change over steps of optimization
-        viz.viz_movie(net, embeddings, embeddings_nonsequential, Y, grid, losses, args)
+        if args.renderer == 'matplotlib':
+            viz_matplotlib.viz_movie(net, embeddings, embeddings_nonsequential, Y, grid, losses, args)
+        elif args.renderer == 'threejs':
+            raise NotImplementedError("ThreeJS movie visualization not implemented yet")
+        elif args.renderer == 'plotly':
+            raise NotImplementedError("plotly movie visualization not implemented yet")
     
     elif args.viz_type == 'static':
         # visualize the embeddings as a static plot
-        viz.viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args)
+        if args.renderer == 'matplotlib':
+            viz_matplotlib.viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args)
+        elif args.renderer == 'threejs':
+            viz_threejs.viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args)
+        elif args.renderer == 'plotly':
+            viz_plotly.viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args)
 
     else:
         raise ValueError(f"Visualization type {args.viz_type} not found")
