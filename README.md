@@ -61,4 +61,13 @@ Output (click to play the video):
   <a href="https://web.mit.edu/phillipi/www/plot-net/SimpleResnet.mp4"><img src="img/SimpleResnet.png" alt="Link to video should appear here" width="350"/></a>
 </div>
 
+### 4) Interactive threejs webpage visualizing a forward diffusion process:
+
+`python plot-net.py --which_dataset spiral --which_model diffusion --d 2 --train False --viz_type static --renderer threejs`
+
+Output (click to load interactive webpage):
+
+<div align="center">
+  <a href="https://web.mit.edu/phillipi/www/plot-net/threejs/diffusion/index.html"><img src="img/diffusion_example.pn" alt="Link to interactive webpage should appear here" width="350"/></a>
+</div>
 
