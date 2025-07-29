@@ -1,6 +1,12 @@
 # plot-net
 Tools for visualizing neural nets.
 
+⮕ renders how embeddings map layer to layer in simple networks<br>
+⮕ supports 2D and 3D embeddings<br>
+⮕ render training process as a movie<br>
+⮕ render as image, video, or interactive webpage (plotly or threejs)
+
+
 ## Setup (on mac/linux)
 ```
 git clone git@github.com:phillipi/plot-net.git
