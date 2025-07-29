@@ -2,8 +2,6 @@ import json
 import numpy as np
 
 def viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args):
-    if args.d == 3:
-        raise NotImplementedError("ThreeJS 3D data visualization not implemented yet")
     export_viz_data(net, embeddings, embeddings_nonsequential, Y, grid)
 
 def export_viz_data(net, embeddings, embeddings_nonsequential, Y, grid, path='./threejs/viz_data.json'):
