@@ -58,7 +58,7 @@ if __name__ == "__main__":
         if args.renderer == 'matplotlib':
             viz_matplotlib.viz_movie(net, embeddings, embeddings_nonsequential, Y, grid, losses, args)
         elif args.renderer == 'threejs':
-            raise NotImplementedError("ThreeJS movie visualization not implemented yet")
+            viz_threejs.viz(net, embeddings, embeddings_nonsequential, Y, grid, args)
         elif args.renderer == 'plotly':
             raise NotImplementedError("plotly movie visualization not implemented yet")
     
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         if args.renderer == 'matplotlib':
             viz_matplotlib.viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args)
         elif args.renderer == 'threejs':
-            viz_threejs.viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args)
+            viz_threejs.viz(net, embeddings, embeddings_nonsequential, Y, grid, args)
         elif args.renderer == 'plotly':
             viz_plotly.viz_static(net, embeddings, embeddings_nonsequential, Y, grid, args)
 
