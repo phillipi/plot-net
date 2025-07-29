@@ -68,6 +68,6 @@ Output (click to play the video):
 Output (click to load interactive webpage):
 
 <div align="center">
-  <a href="https://web.mit.edu/phillipi/www/plot-net/threejs/diffusion/index.html"><img src="img/diffusion_example.pn" alt="Link to interactive webpage should appear here" width="350"/></a>
+  <a href="https://web.mit.edu/phillipi/www/plot-net/threejs/diffusion/index.html"><img src="img/diffusion_example.png" alt="Link to interactive webpage should appear here" width="350"/></a>
 </div>
 
