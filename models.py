@@ -144,6 +144,23 @@ class LinearLayer(Net):
                 if m.bias is not None:
                     torch.nn.init.zeros_(m.bias)
 
+class DiffusionLayer(torch.nn.Module):
+    def __init__(self, d=2):
+        super(DiffusionLayer, self).__init__()
+        self.d = d
+
+    def forward(self, x):
+        return 0.92*x+torch.randn_like(x)*0.08
+
+class DiffusionNet(Net):
+    def __init__(self, d=2):
+        super(DiffusionNet, self).__init__(d)
+
+        self.diffusion_layer1 = DiffusionLayer(d)
+        self.diffusion_layer2 = DiffusionLayer(d)
+        self.diffusion_layer3 = DiffusionLayer(d)
+        self.diffusion_layer4 = DiffusionLayer(d)
+        
 class Norm(torch.nn.Module):
     def __init__(self,p):
         super(Norm, self).__init__()
@@ -177,6 +194,8 @@ def mk_model(which_model, d=2):
         return SimpleResnet(d)
     elif which_model == 'linear':
         return LinearLayer(d)
+    elif which_model == 'diffusion':
+        return DiffusionNet(d)
     elif which_model == 'relu':
         return ReLULayer(d)
     elif which_model == 'l2_norm':

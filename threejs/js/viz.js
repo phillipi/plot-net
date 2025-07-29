@@ -425,7 +425,7 @@ function vizMapping3D(frame = 0) {
 }
 
 // Check if this is movie data (has time dimension)
-const isMovie = embeddings.length > 0 && Array.isArray(embeddings[0]) && embeddings[0].length > 0 && Array.isArray(embeddings[0][0]);
+const isMovie = viz_type === 'movie';
 const currentFrame = { value: 0 };
 const totalFrames = isMovie ? embeddings.length : 1;
 
@@ -519,14 +519,14 @@ initializeStaticObjects();
 
 // Call appropriate function based on dimensionality
 if (d === 2) {
-  if (isMovie && viz_type === 'movie') {
+  if (viz_type === 'movie') {
     vizMapping2D(0); // Start with frame 0
     animateMovie();
   } else {
     vizMapping2D();
   }
 } else if (d === 3) {
-  if (isMovie && viz_type === 'movie') {
+  if (viz_type === 'movie') {
     vizMapping3D(0); // Start with frame 0
     animateMovie();
   } else {

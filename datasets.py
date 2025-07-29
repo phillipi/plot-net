@@ -73,6 +73,25 @@ def mk_gaussian_data(d=2):
 
     return X, Y
 
+def mk_spiral(d=2):
+    if d != 2:
+        raise ValueError('Spiral only supported in 2D')
+
+    Nsamples = 200
+    
+    # make a spiral in 2D
+    t = np.linspace(0, 10, Nsamples)
+    x = np.cos(t)
+    y = np.sin(t)
+    # scale so it is a spiral
+    x = x*t/10
+    y = y*t/10
+    X = np.stack([x, y], axis=1)
+    X = torch.tensor(X.astype(np.float32))
+    Y = None
+    return X, Y
+
+
 # create data
 def mk_dataset(which_dataset, d):
 
@@ -82,6 +101,8 @@ def mk_dataset(which_dataset, d):
         return mk_ternary_classification(d)
     elif which_dataset == 'gaussian_data':
         return mk_gaussian_data(d)
+    elif which_dataset == 'spiral':
+        return mk_spiral(d)
     else:
         raise ValueError(f"Dataset {which_dataset} not found")
 
